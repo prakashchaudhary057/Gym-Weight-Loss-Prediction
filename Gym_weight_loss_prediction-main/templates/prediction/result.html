@@ -1,0 +1,203 @@
+{% extends 'prediction/base.html' %}
+{% load static %}
+
+{% block title %}Prediction Result - Gym Weight Loss Prediction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold">
+                    <i class="bi bi-graph-up-arrow me-3"></i>Your Prediction Result
+                </h1>
+                <p class="lead text-white-50">
+                    Based on your input data, here is your predicted weight loss outcome.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Result Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+
+                <!-- Main Result Card -->
+                <div class="card border-0 shadow-lg mb-4 result-card">
+                    <div class="card-body text-center p-5">
+                        <div class="result-icon mb-4">
+                            <div class="prediction-circle bg-{{ interpretation.color }}">
+                                <span class="display-3 fw-bold text-white">{{ prediction }}</span>
+                                <span class="text-white fs-5">kg</span>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold mb-2">Predicted Weight Loss</h2>
+                        <span class="badge bg-{{ interpretation.color }} fs-6 px-4 py-2 mb-3">
+                            {{ interpretation.level }}
+                        </span>
+                        <p class="lead text-muted mt-3">{{ interpretation.message }}</p>
+                    </div>
+                </div>
+
+                <div class="row g-4">
+                    <!-- Input Summary -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-person-badge me-2"></i>Your Input Summary
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless mb-0">
+                                    <tbody>
+                                        <tr>
+                                            <td class="text-muted">
+                                                <i class="bi bi-calendar3 me-2"></i>Age
+                                            </td>
+                                            <td class="fw-semibold text-end">{{ input_data.age }} years</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">
+                                                <i class="bi bi-gender-ambiguous me-2"></i>Gender
+                                            </td>
+                                            <td class="fw-semibold text-end">{{ input_data.gender }}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">
+                                                <i class="bi bi-rulers me-2"></i>Height
+                                            </td>
+                                            <td class="fw-semibold text-end">{{ input_data.height_cm }} cm</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">
+                                                <i class="bi bi-speedometer me-2"></i>Weight
+                                            </td>
+                                            <td class="fw-semibold text-end">{{ input_data.weight_kg }} kg</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">
+                                                <i class="bi bi-stopwatch me-2"></i>Workout Hours/Week
+                                            </td>
+                                            <td class="fw-semibold text-end">{{ input_data.workout_hours }} hrs</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">
+                                                <i class="bi bi-fire me-2"></i>Daily Calories
+                                            </td>
+                                            <td class="fw-semibold text-end">{{ input_data.calories }} kcal</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="text-muted">
+                                                <i class="bi bi-moon-stars me-2"></i>Sleep Hours
+                                            </td>
+                                            <td class="fw-semibold text-end">{{ input_data.sleep_hours }} hrs</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BMI & Health Info -->
+                    <div class="col-lg-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="mb-0">
+                                    <i class="bi bi-heart-pulse me-2"></i>Health Metrics
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <!-- BMI Display -->
+                                <div class="text-center mb-4">
+                                    <h6 class="text-muted">Body Mass Index (BMI)</h6>
+                                    <div class="display-4 fw-bold text-{{ bmi_category.color }}">
+                                        {{ bmi }}
+                                    </div>
+                                    <span class="badge bg-{{ bmi_category.color }} fs-6 px-3 py-2">
+                                        {{ bmi_category.category }}
+                                    </span>
+                                </div>
+
+                                <!-- BMI Scale -->
+                                <div class="bmi-scale mt-3">
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar bg-info" style="width: 25%">
+                                            <small>&lt;18.5</small>
+                                        </div>
+                                        <div class="progress-bar bg-success" style="width: 25%">
+                                            <small>18.5-24.9</small>
+                                        </div>
+                                        <div class="progress-bar bg-warning" style="width: 25%">
+                                            <small>25-29.9</small>
+                                        </div>
+                                        <div class="progress-bar bg-danger" style="width: 25%">
+                                            <small>30+</small>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between mt-1">
+                                        <small class="text-muted">Underweight</small>
+                                        <small class="text-muted">Normal</small>
+                                        <small class="text-muted">Overweight</small>
+                                        <small class="text-muted">Obese</small>
+                                    </div>
+                                </div>
+
+                                <!-- Weight after loss -->
+                                <div class="mt-4 p-3 bg-light rounded text-center">
+                                    <h6 class="text-muted mb-1">Expected Weight After Loss</h6>
+                                    <h3 class="fw-bold text-primary mb-0">
+                                        {{ input_data.weight_kg|floatformat:1 }} →
+                                        <span class="text-success">
+                                            {% widthratio input_data.weight_kg 1 1 as current_weight %}
+                                            {% widthratio prediction 1 1 as loss %}
+                                        </span>
+                                    </h3>
+                                    <small class="text-muted">
+                                        Approximately {{ prediction }} kg reduction expected
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips & Recommendations -->
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">
+                            <i class="bi bi-lightbulb-fill me-2"></i>Personalized Recommendations
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            {% for tip in interpretation.tips %}
+                            <div class="col-md-6 mb-3">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-check2-circle text-success me-2 mt-1 fs-5"></i>
+                                    <span>{{ tip }}</span>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'prediction:predict' %}" class="btn btn-primary btn-lg px-4 me-2 rounded-pill">
+                        <i class="bi bi-arrow-repeat me-2"></i> New Prediction
+                    </a>
+                    <a href="{% url 'prediction:dashboard' %}" class="btn btn-outline-primary btn-lg px-4 rounded-pill">
+                        <i class="bi bi-bar-chart-fill me-2"></i> View Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,230 @@
+{% extends 'prediction/base.html' %}
+{% load static %}
+
+{% block title %}Predict Weight Loss - Gym Weight Loss Prediction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold">
+                    <i class="bi bi-calculator-fill me-3"></i>Weight Loss Prediction
+                </h1>
+                <p class="lead text-white-50">
+                    Enter your details below and our ML model will predict your expected weight loss.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Prediction Form -->
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card border-0 shadow-lg prediction-form-card">
+                    <div class="card-header bg-primary text-white py-3">
+                        <h4 class="mb-0">
+                            <i class="bi bi-person-lines-fill me-2"></i>
+                            Enter Your Information
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form method="POST" action="{% url 'prediction:predict' %}" id="predictionForm">
+                            {% csrf_token %}
+
+                            <div class="row g-4">
+                                <!-- Age -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="age" class="form-label fw-semibold">
+                                            <i class="bi bi-calendar3 text-primary me-1"></i> Age
+                                        </label>
+                                        {{ form.age }}
+                                        {% if form.age.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.age.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">{{ form.age.help_text }}</small>
+                                    </div>
+                                </div>
+
+                                <!-- Gender -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="gender" class="form-label fw-semibold">
+                                            <i class="bi bi-gender-ambiguous text-primary me-1"></i> Gender
+                                        </label>
+                                        {{ form.gender }}
+                                        {% if form.gender.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.gender.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">{{ form.gender.help_text }}</small>
+                                    </div>
+                                </div>
+
+                                <!-- Height -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="height_cm" class="form-label fw-semibold">
+                                            <i class="bi bi-rulers text-primary me-1"></i> Height (cm)
+                                        </label>
+                                        {{ form.height_cm }}
+                                        {% if form.height_cm.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.height_cm.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">{{ form.height_cm.help_text }}</small>
+                                    </div>
+                                </div>
+
+                                <!-- Weight -->
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="weight_kg" class="form-label fw-semibold">
+                                            <i class="bi bi-speedometer text-primary me-1"></i> Weight (kg)
+                                        </label>
+                                        {{ form.weight_kg }}
+                                        {% if form.weight_kg.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.weight_kg.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">{{ form.weight_kg.help_text }}</small>
+                                    </div>
+                                </div>
+
+                                <!-- Workout Hours -->
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="workout_hours" class="form-label fw-semibold">
+                                            <i class="bi bi-stopwatch text-primary me-1"></i> Workout Hours/Week
+                                        </label>
+                                        {{ form.workout_hours_per_week }}
+                                        {% if form.workout_hours_per_week.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.workout_hours_per_week.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Workout hours per week
+                                            </small>
+                                    </div>
+                                </div>
+
+                                <!-- Daily Calorie Intake -->
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="calories" class="form-label fw-semibold">
+                                            <i class="bi bi-fire text-primary me-1"></i> Daily Calories
+                                        </label>
+                                        {{ form.daily_calorie_intake }}
+                                        {% if form.daily_calorie_intake.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.daily_calorie_intake.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">Daily calorie intake
+                                            </small>
+                                    </div>
+                                </div>
+
+                                <!-- Sleep Hours -->
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="sleep_hours" class="form-label fw-semibold">
+                                            <i class="bi bi-moon-stars text-primary me-1"></i> Sleep Hours
+                                        </label>
+                                        {{ form.sleep_hours }}
+                                        {% if form.sleep_hours.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.sleep_hours.errors.0 }}
+                                        </div>
+                                        {% endif %}
+                                        <small class="form-text text-muted">{{ form.sleep_hours.help_text }}</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- BMI Preview -->
+                            <div class="mt-4 p-3 bg-light rounded" id="bmiPreview" style="display: none;">
+                                <div class="d-flex align-items-center">
+                                    <i class="bi bi-info-circle-fill text-info me-2 fs-5"></i>
+                                    <span>Your BMI: <strong id="bmiValue">--</strong>
+                                        (<span id="bmiCategory">--</span>)</span>
+                                </div>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <div class="mt-4 text-center">
+                                <button type="submit" class="btn btn-primary btn-lg px-5 py-3 rounded-pill">
+                                    <i class="bi bi-lightning-fill me-2"></i> Predict Weight Loss
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Info Card -->
+                <div class="card border-0 shadow-sm mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">
+                            <i class="bi bi-lightbulb-fill text-warning me-2"></i>Tips for Accurate Prediction
+                        </h5>
+                        <ul class="mb-0">
+                            <li>Enter your current weight, not your target weight.</li>
+                            <li>Be honest about your workout hours — include only actual exercise time.</li>
+                            <li>Daily calorie intake should include all meals and snacks.</li>
+                            <li>Sleep hours should reflect your average nightly sleep.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Real-time BMI calculation
+    const heightInput = document.getElementById('height_cm');
+    const weightInput = document.getElementById('weight_kg');
+    const bmiPreview = document.getElementById('bmiPreview');
+    const bmiValue = document.getElementById('bmiValue');
+    const bmiCategory = document.getElementById('bmiCategory');
+
+    function calculateBMI() {
+        const height = parseFloat(heightInput.value);
+        const weight = parseFloat(weightInput.value);
+
+        if (height > 0 && weight > 0) {
+            const heightM = height / 100;
+            const bmi = (weight / (heightM * heightM)).toFixed(1);
+            bmiValue.textContent = bmi;
+
+            let category = '';
+            if (bmi < 18.5) category = 'Underweight';
+            else if (bmi < 25) category = 'Normal Weight';
+            else if (bmi < 30) category = 'Overweight';
+            else category = 'Obese';
+
+            bmiCategory.textContent = category;
+            bmiPreview.style.display = 'block';
+        } else {
+            bmiPreview.style.display = 'none';
+        }
+    }
+
+    if (heightInput && weightInput) {
+        heightInput.addEventListener('input', calculateBMI);
+        weightInput.addEventListener('input', calculateBMI);
+    }
+</script>
+{% endblock %}

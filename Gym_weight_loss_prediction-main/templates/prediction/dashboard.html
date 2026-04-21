@@ -1,0 +1,487 @@
+{% extends 'prediction/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Gym Weight Loss Prediction{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<section class="page-header py-5 bg-dark text-white">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-4 fw-bold">
+                    <i class="bi bi-bar-chart-fill me-3"></i>Analytics Dashboard
+                </h1>
+                <p class="lead text-white-50">
+                    Explore dataset visualizations, model performance metrics, and prediction history.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Dataset Statistics -->
+<section class="py-5">
+    <div class="container">
+        {% if dataset_stats %}
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm stat-dashboard-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-people-fill text-primary fs-2 mb-2"></i>
+                        <h3 class="fw-bold mb-0">{{ dataset_stats.total_records }}</h3>
+                        <small class="text-muted">Total Records</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm stat-dashboard-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-graph-down-arrow text-success fs-2 mb-2"></i>
+                        <h3 class="fw-bold mb-0">{{ dataset_stats.avg_weight_loss }} kg</h3>
+                        <small class="text-muted">Avg Weight Loss</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm stat-dashboard-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-stopwatch text-warning fs-2 mb-2"></i>
+                        <h3 class="fw-bold mb-0">{{ dataset_stats.avg_workout_hours }} hrs</h3>
+                        <small class="text-muted">Avg Workout Hours</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-6">
+                <div class="card border-0 shadow-sm stat-dashboard-card">
+                    <div class="card-body text-center">
+                        <i class="bi bi-calendar3 text-info fs-2 mb-2"></i>
+                        <h3 class="fw-bold mb-0">{{ dataset_stats.avg_age }}</h3>
+                        <small class="text-muted">Avg Age</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Metrics -->
+        {% if model_metrics %}
+        <div class="card border-0 shadow-sm mb-5">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-speedometer2 me-2"></i>Model Performance Metrics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4 text-center">
+                    <div class="col-md-3 col-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-muted">R² Score</h6>
+                            <h3 class="fw-bold text-success">{{ model_metrics.r2_score }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-muted">MAE</h6>
+                            <h3 class="fw-bold text-primary">{{ model_metrics.mae }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-muted">MSE</h6>
+                            <h3 class="fw-bold text-warning">{{ model_metrics.mse }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-3 col-6">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-muted">RMSE</h6>
+                            <h3 class="fw-bold text-info">{{ model_metrics.rmse }}</h3>
+                        </div>
+                    </div>
+                </div>
+                {% if model_metrics.best_model %}
+                <div class="mt-3 text-center">
+                    <span class="badge bg-success fs-6 px-4 py-2">
+                        <i class="bi bi-trophy-fill me-2"></i>Best Model: {{ model_metrics.best_model }}
+                    </span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Charts Row 1 -->
+        <div class="row g-4 mb-4">
+            <!-- Weight Loss by Workout Hours -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart text-primary me-2"></i>
+                            Avg Weight Loss by Workout Hours
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="workoutChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Gender Comparison -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pie-chart text-success me-2"></i>
+                            Weight Loss by Gender
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="genderChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row g-4 mb-4">
+            <!-- Age Distribution -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-bar-chart-steps text-info me-2"></i>
+                            Age Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="ageChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weight Loss Distribution -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-graph-down text-warning me-2"></i>
+                            Weight Loss Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="weightLossChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 3 -->
+        <div class="row g-4 mb-4">
+            <!-- Scatter Plot: Workout vs Weight Loss -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-scatter-chart text-danger me-2"></i>
+                            Workout Hours vs Weight Loss
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="scatterChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Calorie Distribution -->
+            <div class="col-lg-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-fire text-danger me-2"></i>
+                            Calorie Intake Distribution
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="calorieChart" height="300"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% else %}
+        <!-- No Data Message -->
+        <div class="text-center py-5">
+            <i class="bi bi-database-x text-muted display-1"></i>
+            <h3 class="mt-3 text-muted">No Dataset Found</h3>
+            <p class="text-muted">
+                Please ensure the dataset file exists at <code>data/gym_members_dataset.csv</code>
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Recent Predictions -->
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="bi bi-clock-history me-2"></i>Recent Predictions
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_predictions %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Age</th>
+                                <th>Gender</th>
+                                <th>Weight (kg)</th>
+                                <th>Workout Hrs</th>
+                                <th>Calories</th>
+                                <th>Predicted Loss (kg)</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for record in recent_predictions %}
+                            <tr>
+                                <td>{{ record.id }}</td>
+                                <td>{{ record.age }}</td>
+                                <td>{{ record.gender_display }}</td>
+                                <td>{{ record.weight_kg }}</td>
+                                <td>{{ record.workout_hours_per_week }}</td>
+                                <td>{{ record.daily_calorie_intake }}</td>
+                                <td>
+                                    <span class="badge bg-success">{{ record.predicted_weight_loss }} kg</span>
+                                </td>
+                                <td>{{ record.created_at|date:"M d, Y H:i" }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-4">
+                    <i class="bi bi-inbox text-muted fs-1"></i>
+                    <p class="text-muted mt-2">No predictions made yet.
+                        <a href="{% url 'prediction:predict' %}">Make your first prediction!</a>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+{% if chart_data %}
+<script>
+    // Color palette
+    const colors = {
+        primary: 'rgba(13, 110, 253, 0.8)',
+        success: 'rgba(25, 135, 84, 0.8)',
+        info: 'rgba(13, 202, 240, 0.8)',
+        warning: 'rgba(255, 193, 7, 0.8)',
+        danger: 'rgba(220, 53, 69, 0.8)',
+        purple: 'rgba(111, 66, 193, 0.8)',
+        primaryLight: 'rgba(13, 110, 253, 0.2)',
+        successLight: 'rgba(25, 135, 84, 0.2)',
+    };
+
+    // 1. Workout Hours vs Weight Loss (Bar Chart)
+    new Chart(document.getElementById('workoutChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.workout_labels | safe }},
+        datasets: [{
+            label: 'Avg Weight Loss (kg)',
+            data: {{ chart_data.workout_loss_data | safe }},
+        backgroundColor: [
+            colors.primary,
+            colors.success,
+            colors.info,
+            colors.warning,
+            colors.danger,
+        ],
+        borderRadius: 8,
+        borderSkipped: false,
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Weight Loss (kg)' }
+            },
+            x: {
+                title: { display: true, text: 'Workout Hours/Week' }
+            }
+        }
+    }
+    });
+
+    // 2. Gender Comparison (Doughnut Chart)
+    new Chart(document.getElementById('genderChart'), {
+        type: 'doughnut',
+        data: {
+            labels: {{ chart_data.gender_labels | safe }},
+        datasets: [{
+            data: {{ chart_data.gender_loss_data | safe }},
+        backgroundColor: [colors.danger, colors.primary],
+        borderWidth: 3,
+        borderColor: '#fff',
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' },
+            title: {
+                display: true,
+                text: 'Average Weight Loss by Gender (kg)'
+            }
+        }
+    }
+    });
+
+    // 3. Age Distribution (Bar Chart)
+    new Chart(document.getElementById('ageChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.age_labels | safe }},
+        datasets: [{
+            label: 'Number of Members',
+            data: {{ chart_data.age_data | safe }},
+        backgroundColor: colors.info,
+        borderRadius: 8,
+        borderSkipped: false,
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Count' }
+            },
+            x: {
+                title: { display: true, text: 'Age Group' }
+            }
+        }
+    }
+    });
+
+    // 4. Weight Loss Distribution (Bar Chart)
+    new Chart(document.getElementById('weightLossChart'), {
+        type: 'bar',
+        data: {
+            labels: {{ chart_data.wl_labels | safe }},
+        datasets: [{
+            label: 'Number of Members',
+            data: {{ chart_data.wl_data | safe }},
+        backgroundColor: [
+            colors.danger,
+            colors.warning,
+            colors.info,
+            colors.success,
+            colors.primary,
+        ],
+        borderRadius: 8,
+        borderSkipped: false,
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { display: false },
+        },
+        scales: {
+            y: {
+                beginAtZero: true,
+                title: { display: true, text: 'Count' }
+            },
+            x: {
+                title: { display: true, text: 'Weight Loss Range' }
+            }
+        }
+    }
+    });
+
+    // 5. Scatter Plot: Workout Hours vs Weight Loss
+    const workoutData = {{ chart_data.scatter_workout| safe }};
+    const weightLossData = {{ chart_data.scatter_weight_loss| safe }};
+    const scatterData = workoutData.map((x, i) => ({ x: x, y: weightLossData[i] }));
+
+    new Chart(document.getElementById('scatterChart'), {
+        type: 'scatter',
+        data: {
+            datasets: [{
+                label: 'Members',
+                data: scatterData,
+                backgroundColor: colors.primary,
+                pointRadius: 5,
+                pointHoverRadius: 8,
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+            },
+            scales: {
+                y: {
+                    title: { display: true, text: 'Weight Loss (kg)' }
+                },
+                x: {
+                    title: { display: true, text: 'Workout Hours/Week' }
+                }
+            }
+        }
+    });
+
+    // 6. Calorie Distribution (Pie Chart)
+    new Chart(document.getElementById('calorieChart'), {
+        type: 'pie',
+        data: {
+            labels: {{ chart_data.calorie_labels | safe }},
+        datasets: [{
+            data: {{ chart_data.calorie_data | safe }},
+        backgroundColor: [
+            colors.success,
+            colors.primary,
+            colors.warning,
+            colors.danger,
+        ],
+        borderWidth: 3,
+        borderColor: '#fff',
+            }]
+        },
+        options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: { position: 'bottom' },
+            title: {
+                display: true,
+                text: 'Calorie Intake Distribution'
+            }
+        }
+    }
+    });
+</script>
+{% endif %}
+{% endblock %}
